@@ -80,11 +80,8 @@
                       (buffer-file-name) "tox.ini")
                      "./")))
 
-(defun tox-get-command (&optional envlist)
+(defun tox-get-command (tox-test &optional envlist)
   "Return the command to launch tests."
-  (let ((current-function (python-info-current-defun)))
-    (unless current-function
-      (error "No function at point"))
     (concat
      tox-program " "
      tox-arg " "
@@ -96,7 +93,7 @@
                    (buffer-file-name))
                   (length (tox-get-root-directory)))))
      ":"
-     current-function)))
+     tox-test))
 
 ;;; Public interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -110,8 +107,11 @@
            tox-default-env))
         (default-directory (tox-get-root-directory))
         (compilation-auto-jump-to-first-error nil)
-        (compilation-scroll-output nil))
-    (compile (tox-get-command toxenvs)))
+        (compilation-scroll-output nil)
+        (current-function (python-info-current-defun)))
+    (unless current-function
+      (error "No function at point"))
+    (compile (tox-get-command current-function toxenvs)))
   )
 
 ;;; End tox.el ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
