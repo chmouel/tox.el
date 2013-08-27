@@ -12,9 +12,9 @@
 
 ;;; Commentary:
 
-;; Call `tox-current-test' to launch the current test with tox.  with
-;; an argument it will read the tox.ini and ask you for a value for a
-;; tox environement variable.
+;; Call `tox-current-test' or `tox-current-cast' to launch the current
+;; test or class with tox.  with an argument it will read the tox.ini
+;; and ask you for a value for a tox environement variable.
 
 ;; Originally the ideas was coming from nosetests.el (written by me)
 ;; which was modified by Julien Danjou <julien@danjou.info) and
@@ -99,7 +99,9 @@
 
 ;;;###autoload
 (defun tox-current-test (&optional askenvs)
-  "Launch tox tests, asking for a tox environement with an argument."
+  "Launch tox on current test.
+A prefix arg will ask for a env to use which is by default what
+specified in `tox-default-env'."
   (interactive "P")
   (let ((toxenvs (if askenvs
                      (completing-read
@@ -112,6 +114,25 @@
     (unless current-function
       (error "No function at point"))
     (compile (tox-get-command current-function toxenvs)))
+  )
+
+;;;###autoload
+(defun tox-current-class (&optional askenvs)
+  "Launch tox on current class.
+A prefix arg will ask for a env to use which is by default what
+specified in `tox-default-env'."
+  (interactive "P")
+  (let ((toxenvs (if askenvs
+                     (completing-read
+                      "Tox Environement: " (tox-read-tox-ini-envlist))
+           tox-default-env))
+        (default-directory (tox-get-root-directory))
+        (compilation-auto-jump-to-first-error nil)
+        (compilation-scroll-output nil)
+        (current-class (car (split-string (python-info-current-defun) "\\."))))
+    (unless current-class
+      (error "No class at point"))
+    (message (tox-get-command current-class toxenvs)))
   )
 
 ;;; End tox.el ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
