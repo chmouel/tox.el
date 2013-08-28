@@ -20,6 +20,11 @@
 ;; which was modified by Julien Danjou <julien@danjou.info) and
 ;; adapted to tox.
 
+;;; TODO:
+
+;; - Refactorize tox-current-test and tox-current-class in one.
+;; - Don't read multiple times tox.ini for same project.
+
 ;;; License:
 
 ;; This file is NOT part of GNU Emacs.
