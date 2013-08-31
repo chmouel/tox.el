@@ -1,12 +1,11 @@
-;;; tox.el --- Launch current python test with tox.
+;;; tox.el --- Launch current python test with tox
 
 ;; Copyright (C) 2013 Chmouel Boudjnah <chmouel@chmouel.com>
 
 ;; Author: Chmouel Boudjnah <chmouel@chmouel.com>
 ;; Homepage: https://github.com/chmouel/tox.el
-;; Version: 20130819.1127
-;; X-Original-Version: 0.1
-;; Keywords: convenience tox python tests
+;; Version: 0.1
+;; Keywords: convenience, tox, python, tests
 
 ;;; Installation:
 
