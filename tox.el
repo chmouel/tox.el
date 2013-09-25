@@ -4,16 +4,28 @@
 
 ;; Author: Chmouel Boudjnah <chmouel@chmouel.com>
 ;; Homepage: https://github.com/chmouel/tox.el
-;; Version: 0.1
+;; Version: 20130831.1352
+;; X-Original-Version: 0.1
 ;; Keywords: convenience, tox, python, tests
 
 ;;; Installation:
 
 ;;; Commentary:
 
-;; Call `tox-current-test' or `tox-current-cast' to launch the current
+;; Call `tox-current-test', `tox-current-class' to launch the current
 ;; test or class with tox.  with an argument it will read the tox.ini
 ;; and ask you for a value for a tox environement variable.
+
+;; To use this code, bind the functions `tox-current-test',
+;; `tox-current-class', `tox-current-module' and `tox-current-project'
+;;  to convenient keys with something like:
+
+;;
+;; (define-key python-mode-map (kbd "C-c t") 'tox-current-test)
+;; (define-key python-mode-map (kbd "C-c c") 'tox-current-class)
+;; (define-key python-mode-map (kbd "C-c m") 'tox-current-module)
+;; (define-key python-mode-map (kbd "C-c p") 'tox-current-project)
+;;
 
 ;; Originally the ideas was coming from nosetests.el (written by me)
 ;; which was modified by Julien Danjou <julien@danjou.info) and
@@ -84,24 +96,28 @@
                       (buffer-file-name) "tox.ini")
                      "./")))
 
+(defun tox-extract-path ()
+  "Extract python module from pathname."
+  (subst-char-in-string
+      ?/ ?.
+      (file-name-sans-extension
+       (substring (file-truename
+                   (buffer-file-name))
+                  (length (tox-get-root-directory))))))
+
 (defun tox-get-command (tox-test &optional envlist)
   "Return the command to launch tests."
     (concat
      tox-program " "
      tox-arg " "
      (if envlist (concat "-e" envlist " "))
-     (subst-char-in-string
-      ?/ ?.
-      (file-name-sans-extension
-       (substring (file-truename
-                   (buffer-file-name))
-                  (length (tox-get-root-directory)))))
-     ":"
      tox-test))
+
+;;; Public interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defmacro with-tox (current &optional askenvs &rest body)
-  "Macro which initialize environments variables to launch unit tests on current test or current class."
+  "Macro which initialize environments variables to launch unit tests."
     `(let ((toxenvs (if ,askenvs
 			(completing-read
 			 "Tox Environement: " (tox-read-tox-ini-envlist))
@@ -111,8 +127,6 @@
 	   (compilation-scroll-output nil)
 	   (,current (python-info-current-defun)))
        ,@body))
-
-;;; Public interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;###autoload
@@ -124,7 +138,8 @@ specified in `tox-default-env'."
   (with-tox current askenvs
      (unless current
        (error "No function at point"))
-     (compile (tox-get-command current toxenvs))))
+     (compile (tox-get-command (concat (tox-extract-path) ":" current)
+			       toxenvs))))
 
 ;;;###autoload
 (defun tox-current-class (&optional askenvs)
@@ -135,9 +150,31 @@ specified in `tox-default-env'."
   (with-tox current askenvs
      (if current
 	 (let ((current-class (car (split-string current "\\."))))
-	   (compile (tox-get-command current-class toxenvs)))
+	   (compile (tox-get-command (concat (tox-extract-path) ":" current-class)
+				     toxenvs)))
        (error "No class at point"))))
 
+
+;;;###autoload
+(defun tox-current-module (&optional askenvs)
+  "Launch tox on current module.
+A prefix arg will ask for a env to use which is by default what
+specified in `tox-default-env'."
+  (interactive "P")
+  (with-tox current askenvs
+     (if current
+	 (compile (tox-get-command (tox-extract-path) toxenvs)))))
+
+
+;;;###autoload
+(defun tox-current-project (&optional askenvs)
+  "Launch tox on current project.
+A prefix arg will ask for a env to use which is by default what
+specified in `tox-default-env'."
+  (interactive "P")
+  (with-tox current askenvs
+     (if current
+	 (compile (tox-get-command "" toxenvs)))))
 
 ;;; End tox.el ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
