@@ -133,11 +133,13 @@ specified in `tox-default-env'."
         (default-directory (tox-get-root-directory))
         (compilation-auto-jump-to-first-error nil)
         (compilation-scroll-output nil)
-        (current-class (car (split-string (python-info-current-defun) "\\."))))
-    (unless current-class
-      (error "No class at point"))
-    (message (tox-get-command current-class toxenvs)))
-  )
+	(current (python-info-current-defun)))
+    (if current
+	(let ((current-class (car (split-string current "\\."))))
+	  (compile (tox-get-command current-class toxenvs)))
+      (error "No class at point"))))
+
+
 
 ;;; End tox.el ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
