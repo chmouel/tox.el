@@ -99,7 +99,21 @@
      ":"
      tox-test))
 
+
+(defmacro with-tox (current &optional askenvs &rest body)
+  "Macro which initialize environments variables to launch unit tests on current test or current class."
+    `(let ((toxenvs (if ,askenvs
+			(completing-read
+			 "Tox Environement: " (tox-read-tox-ini-envlist))
+		      tox-default-env))
+	   (default-directory (tox-get-root-directory))
+	   (compilation-auto-jump-to-first-error nil)
+	   (compilation-scroll-output nil)
+	   (,current (python-info-current-defun)))
+       ,@body))
+
 ;;; Public interface ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;;###autoload
 (defun tox-current-test (&optional askenvs)
@@ -107,18 +121,10 @@
 A prefix arg will ask for a env to use which is by default what
 specified in `tox-default-env'."
   (interactive "P")
-  (let ((toxenvs (if askenvs
-                     (completing-read
-                      "Tox Environement: " (tox-read-tox-ini-envlist))
-           tox-default-env))
-        (default-directory (tox-get-root-directory))
-        (compilation-auto-jump-to-first-error nil)
-        (compilation-scroll-output nil)
-        (current-function (python-info-current-defun)))
-    (unless current-function
-      (error "No function at point"))
-    (compile (tox-get-command current-function toxenvs)))
-  )
+  (with-tox current askenvs
+     (unless current
+       (error "No function at point"))
+     (compile (tox-get-command current toxenvs))))
 
 ;;;###autoload
 (defun tox-current-class (&optional askenvs)
@@ -126,19 +132,11 @@ specified in `tox-default-env'."
 A prefix arg will ask for a env to use which is by default what
 specified in `tox-default-env'."
   (interactive "P")
-  (let ((toxenvs (if askenvs
-                     (completing-read
-                      "Tox Environement: " (tox-read-tox-ini-envlist))
-           tox-default-env))
-        (default-directory (tox-get-root-directory))
-        (compilation-auto-jump-to-first-error nil)
-        (compilation-scroll-output nil)
-	(current (python-info-current-defun)))
-    (if current
-	(let ((current-class (car (split-string current "\\."))))
-	  (compile (tox-get-command current-class toxenvs)))
-      (error "No class at point"))))
-
+  (with-tox current askenvs
+     (if current
+	 (let ((current-class (car (split-string current "\\."))))
+	   (compile (tox-get-command current-class toxenvs)))
+       (error "No class at point"))))
 
 
 ;;; End tox.el ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
