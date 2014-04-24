@@ -4,7 +4,7 @@
 
 ;; Author: Chmouel Boudjnah <chmouel@chmouel.com>
 ;; Homepage: https://github.com/chmouel/tox.el
-;; Version: 0.1
+;; Version: 0.2
 ;; Keywords: convenience, tox, python, tests
 
 ;;; Installation:
