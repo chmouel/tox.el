@@ -54,6 +54,12 @@
 (defvar tox-default-env nil
   "Default argument for Tox")
 
+(defvar tox-use-all-dot-style nil
+  "Change the way we are calling the tests.
+Instead of having the tests passed to something like
+tests.test_file:Class.function which is used by nosetests use this
+form instead tests.test_file:Class.function used by testr.")
+
 ;;; Commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun tox-read-tox-ini-envlist()
@@ -96,7 +102,7 @@
        (substring (file-truename
                    (buffer-file-name))
                   (length (tox-get-root-directory)))))
-     ":"
+     (if tox-use-all-dot-style "." ":")
      tox-test))
 
 
