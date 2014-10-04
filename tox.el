@@ -4,7 +4,7 @@
 
 ;; Author: Chmouel Boudjnah <chmouel@chmouel.com>
 ;; Homepage: https://github.com/chmouel/tox.el
-;; Version: 0.2
+;; Version: 0.3
 ;; Keywords: convenience, tox, python, tests
 
 ;;; Installation:
@@ -21,7 +21,6 @@
 
 ;;; TODO:
 
-;; - Refactorize tox-current-test and tox-current-class in one.
 ;; - Don't read multiple times tox.ini for same project.
 
 ;;; License:
@@ -127,7 +126,8 @@ form instead tests.test_file:Class.function used by testr.")
 A prefix arg will ask for a env to use which is by default what
 specified in `tox-default-env'."
   (interactive "P")
-  (with-tox current askenvs
+  (with-tox current (or (not tox-default-env) askenvs)
+     (setq tox-default-env toxenvs)
      (unless current
        (error "No function at point"))
      (compile (tox-get-command current toxenvs))))
@@ -138,10 +138,11 @@ specified in `tox-default-env'."
 A prefix arg will ask for a env to use which is by default what
 specified in `tox-default-env'."
   (interactive "P")
-  (with-tox current askenvs
+  (with-tox current (or (not tox-default-env) askenvs)
+     (setq tox-default-env toxenvs)            
      (if current
-	 (let ((current-class (car (split-string current "\\."))))
-	   (compile (tox-get-command current-class toxenvs)))
+         (let ((current-class (car (split-string current "\\."))))
+           (compile (tox-get-command current-class toxenvs)))
        (error "No class at point"))))
 
 
