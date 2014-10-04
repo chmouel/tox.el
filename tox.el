@@ -13,7 +13,7 @@
 
 ;; Call `tox-current-test' or `tox-current-cast' to launch the current
 ;; test or class with tox.  with an argument it will read the tox.ini
-;; and ask you for a value for a tox environement variable.
+;; and ask you for a value for a tox environment variable.
 
 ;; Originally the ideas was coming from nosetests.el (written by me)
 ;; which was modified by Julien Danjou <julien@danjou.info) and
@@ -62,7 +62,7 @@ form instead tests.test_file:Class.function used by testr.")
 ;;; Commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun tox-read-tox-ini-envlist()
-  "Read the tox.ini file and grab the environement list."
+  "Read the tox.ini file and grab the environment list."
   (let ((tox-ini-file
          (concat (locate-dominating-file
                   (buffer-file-name) "tox.ini") "tox.ini"))
@@ -109,7 +109,7 @@ form instead tests.test_file:Class.function used by testr.")
   "Macro which initialize environments variables to launch unit tests on current test or current class."
     `(let ((toxenvs (if ,askenvs
 			(completing-read
-			 "Tox Environement: " (tox-read-tox-ini-envlist))
+			 "Tox Environment: " (tox-read-tox-ini-envlist))
 		      tox-default-env))
 	   (default-directory (tox-get-root-directory))
 	   (compilation-auto-jump-to-first-error nil)
