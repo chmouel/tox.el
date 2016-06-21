@@ -1,0 +1,6 @@
+# Emacs
+*~
+.cask/
+*.elc
+elpa
+
