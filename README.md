@@ -16,13 +16,19 @@ parsing your tox.ini.
 ### Test style
 Since `tox` is pretty flexible with the underlying test runner, the calling argument can get different depending of which test runner you are using.
 
-By default `tox.el` will call the test like th way [python-nose ](https://nose.readthedocs.org/en/latest/) is expecting to have :
+By default `tox.el` will call the test like the way [python-nose ](https://nose.readthedocs.org/en/latest/) is expecting to have :
 
 > tox directory.tests.test_file:Class.object
 
 sometime you may use testr which expect only dot and not collon, you can then setup the variable `tox-use-all-dot-style` to tru to get this behavior :
 
 > tox directory.tests.test_file.Class.object
+
+`tox.el` support [py.test](http://doc.pytest.org/). You could change the `tox.el`  runner by setting the `tox-runner` variable :
+
+```lisp
+(setq tox-runner 'py.test)
+```
 
 You may want to set that per-project within your project's `.dirs-locals.el` file.
 
