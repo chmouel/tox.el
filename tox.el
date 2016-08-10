@@ -1,10 +1,10 @@
 ;;; tox.el --- Launch current python test with tox
 
-;; Copyright (C) 2013 Chmouel Boudjnah <chmouel@chmouel.com>
+;; Copyright (C) 2013-2016 Chmouel Boudjnah <chmouel@chmouel.com>
 
 ;; Author: Chmouel Boudjnah <chmouel@chmouel.com>
 ;; Homepage: https://github.com/chmouel/tox.el
-;; Version: 0.3
+;; Version: 0.4.0
 ;; Keywords: convenience, tox, python, tests
 
 ;;; Installation:
@@ -53,11 +53,9 @@
 (defvar tox-default-env nil
   "Default argument for Tox")
 
-(defvar tox-use-all-dot-style nil
-  "Change the way we are calling the tests.
-Instead of having the tests passed to something like
-tests.test_file:Class.function which is used by nosetests use this
-form instead tests.test_file:Class.function used by testr.")
+(defvar tox-runner 'nose
+  "Change the unit test runner used by Tox. Default is 'nose.
+Possibles values are: 'nose, 'py.test.")
 
 ;;; Commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -89,20 +87,30 @@ form instead tests.test_file:Class.function used by testr.")
                       (buffer-file-name) "tox.ini")
                      "./")))
 
+(defun tox--get-runner-arguments (tox-test)
+  (cond ((equalp 'nose tox-runner)
+         (concat (subst-char-in-string ?/ ?.
+                                       (file-name-sans-extension
+                                        (substring (file-truename
+                                                    (buffer-file-name))
+                                                   (length (tox-get-root-directory)))))
+                 ":"
+                 tox-test))
+        ((equalp 'py.test tox-runner)
+         (concat (substring (file-truename
+                              (buffer-file-name))
+                             (length (tox-get-root-directory)))
+                 "::"
+                 (replace-regexp-in-string (regexp-quote ".") "::" tox-test)))))
+
+
 (defun tox-get-command (tox-test &optional envlist)
   "Return the command to launch tests."
     (concat
      tox-program " "
      tox-arg " "
      (if envlist (concat "-e" envlist " "))
-     (subst-char-in-string
-      ?/ ?.
-      (file-name-sans-extension
-       (substring (file-truename
-                   (buffer-file-name))
-                  (length (tox-get-root-directory)))))
-     (if tox-use-all-dot-style "." ":")
-     tox-test))
+     (tox--get-runner-arguments tox-test)))
 
 
 (defmacro with-tox (current &optional askenvs &rest body)
@@ -139,7 +147,7 @@ A prefix arg will ask for a env to use which is by default what
 specified in `tox-default-env'."
   (interactive "P")
   (with-tox current (or (not tox-default-env) askenvs)
-     (setq tox-default-env toxenvs)            
+     (setq tox-default-env toxenvs)
      (if current
          (let ((current-class (car (split-string current "\\."))))
            (compile (tox-get-command current-class toxenvs)))
