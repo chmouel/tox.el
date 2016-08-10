@@ -88,7 +88,7 @@ Possibles values are: 'nose, 'py.test.")
                      "./")))
 
 (defun tox--get-runner-arguments (tox-test)
-  (cond ((equalp 'nose tox-runner)
+  (cond ((eq 'nose tox-runner)
          (concat (subst-char-in-string ?/ ?.
                                        (file-name-sans-extension
                                         (substring (file-truename
@@ -96,7 +96,7 @@ Possibles values are: 'nose, 'py.test.")
                                                    (length (tox-get-root-directory)))))
                  ":"
                  tox-test))
-        ((equalp 'py.test tox-runner)
+        ((eq 'py.test tox-runner)
          (concat (substring (file-truename
                               (buffer-file-name))
                              (length (tox-get-root-directory)))
